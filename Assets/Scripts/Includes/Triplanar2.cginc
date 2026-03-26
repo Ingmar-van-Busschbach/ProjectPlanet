@@ -1,26 +1,13 @@
-// Triplanar.hlsl — URP/HLSL version of Triplanar.cginc
-// Replaces sampler2D + tex2D() with TEXTURE2D + SAMPLE_TEXTURE2D macros.
-//
-// USAGE IN YOUR SHADER:
-//   1. Change:  #include "../Includes/Triplanar.cginc"
-//      To:      #include "../Includes/Triplanar.hlsl"
-//
-//   2. Declare textures in your shader as:
-//        TEXTURE2D(_NoiseTex);  SAMPLER(sampler_NoiseTex);
-//
-//   3. Pass both the texture and its sampler to every triplanar call:
-//        triplanar(pos, normal, scale, _NoiseTex, sampler_NoiseTex)
-
-// ---------------------------------------------------------------------------
+﻿// ---------------------------------------------------------------------------
 // Core triplanar colour sample
 // ---------------------------------------------------------------------------
 float4 triplanar(float3 vertPos, float3 normal, float scale,
-                 TEXTURE2D_PARAM(tex, samplerTex))
+                 Texture2D tex, SamplerState samplerTex)
 {
     float2 uvX = vertPos.zy * scale;
     float2 uvY = vertPos.xz * scale;
     float2 uvZ = vertPos.xy * scale;
-
+    
     float4 colX = SAMPLE_TEXTURE2D(tex, samplerTex, uvX);
     float4 colY = SAMPLE_TEXTURE2D(tex, samplerTex, uvY);
     float4 colZ = SAMPLE_TEXTURE2D(tex, samplerTex, uvZ);
@@ -37,7 +24,7 @@ float4 triplanar(float3 vertPos, float3 normal, float scale,
 // Triplanar colour sample with per-axis offset
 // ---------------------------------------------------------------------------
 float4 triplanarOffset(float3 vertPos, float3 normal, float3 scale,
-                       TEXTURE2D_PARAM(tex, samplerTex), float2 offset)
+                       Texture2D tex, SamplerState samplerTex, float2 offset)
 {
     float3 scaledPos = vertPos / scale;
 
@@ -79,7 +66,7 @@ float3 blend_rnm(float3 n1, float3 n2)
 // Based on: medium.com/@bgolus/normal-mapping-for-a-triplanar-shader-10bf39dca05a
 // ---------------------------------------------------------------------------
 float3 triplanarNormal(float3 vertPos, float3 normal, float3 scale, float2 offset,
-                       TEXTURE2D_PARAM(normalMap, samplerNormalMap))
+                       Texture2D normalMap, SamplerState samplerNormalMap)
 {
     float3 absNormal = abs(normal);
 
@@ -119,18 +106,17 @@ float3 triplanarNormal(float3 vertPos, float3 normal, float3 scale, float2 offse
 // ---------------------------------------------------------------------------
 float3 triplanarNormalTangentSpace(float3 vertPos, float3 normal, float3 scale,
                                    float4 tangent,
-                                   TEXTURE2D_PARAM(normalMap, samplerNormalMap))
+                                   Texture2D normalMap, SamplerState samplerNormalMap)
 {
-    float3 textureNormal = triplanarNormal(vertPos, normal, scale, 0,
-                                           TEXTURE2D_ARGS(normalMap, samplerNormalMap));
+    float3 textureNormal = triplanarNormal(vertPos, normal, scale, 0, normalMap, samplerNormalMap);
     return ObjectToTangentVector(tangent, normal, textureNormal);
 }
 
 float3 triplanarNormalTangentSpace(float3 vertPos, float3 normal, float3 scale,
                                    float2 offset, float4 tangent,
-                                   TEXTURE2D_PARAM(normalMap, samplerNormalMap))
+                                   Texture2D normalMap, SamplerState samplerNormalMap)
 {
     float3 textureNormal = triplanarNormal(vertPos, normal, scale, offset,
-                                           TEXTURE2D_ARGS(normalMap, samplerNormalMap));
+                                           normalMap, samplerNormalMap);
     return ObjectToTangentVector(tangent, normal, textureNormal);
 }

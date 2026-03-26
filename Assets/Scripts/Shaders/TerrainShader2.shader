@@ -45,18 +45,18 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Opaque" "RenderPipeline" = "UniversalPipeline" }
         LOD 100
 
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
 
-            #include "UnityCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+			#include "../Includes/Math.cginc"
+			#include "../Includes/Triplanar2.cginc"
 
 			//Fresnel Data
 			float4 _FresnelCol;
@@ -85,7 +85,7 @@
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
-
+				float4 normal : NORMAL;
 				//float2 uv_MainTex;
 				//float2 uv_BumpMap;
 				//float3 worldPos;
@@ -112,8 +112,8 @@
 
 			// Other
 			float _Glossiness, _Metallic;
-			sampler2D _NoiseTex;
-			sampler2D _BumpMap;
+			TEXTURE2D(_NoiseTex);
+			SAMPLER(sampler_NoiseTex);
 			float _NoiseScale, _NoiseScale2;
 			float _HeightMin, _HeightMax;
 			float _NormalStrength;
@@ -122,22 +122,56 @@
 			float2 heightMinMax;
 			float oceanLevel;
 
+			//float4 triplanar(float3 vertPos, float3 normal, float scale)
+			//{
+			//	float2 uvX = vertPos.zy * scale;
+			//	float2 uvY = vertPos.xz * scale;
+			//	float2 uvZ = vertPos.xy * scale;
+    		//
+			//	float4 colX = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvX);
+			//	float4 colY = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvY);
+			//	float4 colZ = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvZ);
+			//
+			//	// Square normal to keep all values positive and sharpen the blend
+			//	float3 blendWeight = normal * normal;
+			//	// Normalise so x + y + z = 1
+			//	blendWeight /= dot(blendWeight, 1);
+			//
+			//	return colX * blendWeight.x + colY * blendWeight.y + colZ * blendWeight.z;
+			//}
+
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = TransformObjectToHClip(v.vertex);
                 o.uv = v.uv;
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 frag (v2f i) : SV_Target
             {
+				// Calculate steepness: 0 where totally flat, 1 at max steepness
 				float3 sphereNormal = normalize(i.vertex);
-				//float steepness = 1 - dot(sphereNormal, i.normal);
-				//steepness = remap01(steepness, 0, 0.65);
+				float steepness = 1 - dot(sphereNormal, i.normal);
+				steepness = remap01(steepness, 0, 0.65);
+
+				//Overrides in case the material instance has to be saved to disk
+				if (_HeightMin > 0) { heightMinMax.x = _HeightMin;}
+				if (_HeightMax > 0) { heightMinMax.y = _HeightMax;}
+
+				// Calculate heights
+				float terrainHeight = length(i.vertex);
+				float shoreHeight = lerp(heightMinMax.x, 1, oceanLevel);
+				float aboveShoreHeight01 = remap01(terrainHeight, shoreHeight, heightMinMax.y);
+				float flatHeight01 = remap01(aboveShoreHeight01, 0, _MaxFlatHeight);
+
+				// Sample noise texture at two different scales
+				half4 texNoise = triplanar(i.vertex, i.normal, _NoiseScale, _NoiseTex, sampler_NoiseTex);
+				half4 texNoise2 = triplanar(i.vertex, i.normal, _NoiseScale2, _NoiseTex, sampler_NoiseTex);
+
                 return _ShoreLow;
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }
