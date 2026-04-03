@@ -42,7 +42,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: ef9a9b2a9d3ac4d4a8d55454029053e5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -70,7 +70,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: f5c8f5ca9c4e64acd865c37e279ec79a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -119,18 +119,18 @@ Material:
     - _FlatToSteepBlend: 0.1
     - _FlatToSteepNoise: 0.1
     - _FresnelPow: 2
-    - _FresnelStrengthFar: 5
-    - _FresnelStrengthNear: 2
+    - _FresnelStrengthFar: 2
+    - _FresnelStrengthNear: 1
     - _GlossMapScale: 0
-    - _Glossiness: 0
+    - _Glossiness: 0.343
     - _GlossyReflections: 0
-    - _HeightMax: 0
-    - _HeightMin: 0
+    - _HeightMax: 1.14
+    - _HeightMin: 0.91
     - _MaxFlatHeight: 0.5
-    - _Metallic: 0
+    - _Metallic: 0.098
     - _NoiseScale: 1
-    - _NoiseScale2: 1
-    - _NormalStrength: 0.5
+    - _NoiseScale2: 25
+    - _NormalStrength: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
@@ -148,18 +148,18 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
-    - oceanLevel: 0
+    - oceanLevel: 0.762
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FlatHighA: {r: 0, g: 0, b: 0, a: 1}
-    - _FlatLowA: {r: 0, g: 0, b: 0, a: 1}
-    - _FresnelCol: {r: 1, g: 1, b: 1, a: 1}
-    - _ShoreHigh: {r: 0, g: 0, b: 0, a: 1}
-    - _ShoreLow: {r: 1, g: 1, b: 1, a: 1}
+    - _FlatHighA: {r: 0.19215687, g: 0.4627451, b: 0, a: 0}
+    - _FlatLowA: {r: 0.58431375, g: 0.94509804, b: 0, a: 0}
+    - _FresnelCol: {r: 0.2, g: 0.35686275, b: 0.42352942, a: 0}
+    - _ShoreHigh: {r: 0.9529412, g: 0.90588236, b: 0.38039216, a: 0}
+    - _ShoreLow: {r: 0.9843137, g: 1, b: 0.6666667, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SteepHigh: {r: 0, g: 0, b: 0, a: 1}
-    - _SteepLow: {r: 0, g: 0, b: 0, a: 1}
+    - _SteepHigh: {r: 0.14901961, g: 0.06666667, b: 0, a: 0}
+    - _SteepLow: {r: 0.5294118, g: 0.49019608, b: 0.1882353, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

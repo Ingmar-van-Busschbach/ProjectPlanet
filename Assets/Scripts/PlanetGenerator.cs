@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -65,6 +63,7 @@ public class PlanetGenerator : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         Stopwatch stopwatch = Stopwatch.StartNew();
         heightMinMax = GenerateTerrainMesh();
+        UnityEngine.Debug.Log(heightMinMax);
         meshFilter.mesh = mesh;
         ComputeHelper.Release(vertexBuffer);
         ComputeHelper.Release(heightBuffer);

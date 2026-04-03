@@ -79,6 +79,7 @@
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
+				float4 normal : NORMAL;
             };
 
             struct v2f
@@ -122,29 +123,12 @@
 			float2 heightMinMax;
 			float oceanLevel;
 
-			//float4 triplanar(float3 vertPos, float3 normal, float scale)
-			//{
-			//	float2 uvX = vertPos.zy * scale;
-			//	float2 uvY = vertPos.xz * scale;
-			//	float2 uvZ = vertPos.xy * scale;
-    		//
-			//	float4 colX = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvX);
-			//	float4 colY = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvY);
-			//	float4 colZ = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uvZ);
-			//
-			//	// Square normal to keep all values positive and sharpen the blend
-			//	float3 blendWeight = normal * normal;
-			//	// Normalise so x + y + z = 1
-			//	blendWeight /= dot(blendWeight, 1);
-			//
-			//	return colX * blendWeight.x + colY * blendWeight.y + colZ * blendWeight.z;
-			//}
-
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = TransformObjectToHClip(v.vertex);
                 o.uv = v.uv;
+				o.normal = v.normal;
                 return o;
             }
 
@@ -166,10 +150,38 @@
 				float flatHeight01 = remap01(aboveShoreHeight01, 0, _MaxFlatHeight);
 
 				// Sample noise texture at two different scales
-				half4 texNoise = triplanar(i.vertex, i.normal, _NoiseScale, _NoiseTex, sampler_NoiseTex);
-				half4 texNoise2 = triplanar(i.vertex, i.normal, _NoiseScale2, _NoiseTex, sampler_NoiseTex);
+				float4 texNoise = triplanar(i.vertex, i.normal, _NoiseScale, _NoiseTex, sampler_NoiseTex);
+				float4 texNoise2 = triplanar(i.vertex, i.normal, _NoiseScale2, _NoiseTex, sampler_NoiseTex);
 
-                return _ShoreLow;
+				// Flat terrain colour
+				float flatColBlendWeight = Blend(0, _FlatColBlend, (flatHeight01 - .5) + (texNoise.b - 0.5) * _FlatColBlendNoise);
+				float3 flatTerrainCol = lerp(_FlatLowA, _FlatHighA, flatColBlendWeight);
+				flatTerrainCol = lerp(flatTerrainCol, (_FlatLowA + _FlatHighA) / 2, texNoise.a);
+
+				// Shore
+				float shoreBlendWeight = 1 - Blend(_ShoreHeight, _ShoreBlend, flatHeight01);
+				float4 shoreCol = lerp(_ShoreLow, _ShoreHigh, remap01(aboveShoreHeight01, 0, _ShoreHeight));
+				shoreCol = lerp(shoreCol, (_ShoreLow + _ShoreHigh) / 2, texNoise.g);
+				flatTerrainCol = lerp(flatTerrainCol, shoreCol, shoreBlendWeight);
+
+				// Steep terrain colour
+				float3 sphereTangent = normalize(float3(-sphereNormal.z, 0, sphereNormal.x));
+				float3 normalTangent = normalize(i.normal - sphereNormal * dot(i.normal, sphereNormal));
+				float banding = dot(sphereTangent, normalTangent) * .5 + .5;
+				banding = (int)(banding * (_SteepBands + 1)) / _SteepBands;
+				banding = (abs(banding - 0.5) * 2 - 0.5) * _SteepBandStrength;
+				float3 steepTerrainCol = lerp(_SteepLow, _SteepHigh, aboveShoreHeight01 + banding);
+
+				// Flat to steep colour transition
+				float flatBlendNoise = (texNoise2.r - 0.5) * _FlatToSteepNoise;
+				float flatStrength = 1 - Blend(_SteepnessThreshold + flatBlendNoise, _FlatToSteepBlend, steepness);
+				float flatHeightFalloff = 1 - Blend(_MaxFlatHeight + flatBlendNoise, _FlatToSteepBlend, aboveShoreHeight01);
+				flatStrength *= flatHeightFalloff;
+
+				// Set surface colour
+				float3 compositeCol = lerp(steepTerrainCol, flatTerrainCol, flatStrength);
+
+                return float4(compositeCol.xyz,1);
             }
             ENDHLSL
         }
