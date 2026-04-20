@@ -44,6 +44,8 @@ public class PlanetGenerator : MonoBehaviour
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     private Mesh mesh;
+    private Material terrainMatInstance;
+    private GameObject oceanObject;
     private ComputeBuffer vertexBuffer;
     private ComputeBuffer heightBuffer;
 
@@ -63,10 +65,22 @@ public class PlanetGenerator : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         Stopwatch stopwatch = Stopwatch.StartNew();
         heightMinMax = GenerateTerrainMesh();
+        terrainMatInstance = new Material(shaderSettings.terrainMaterial);
+        shaderSettings.SetTerrainProperties(terrainMatInstance, heightMinMax, meshScale, oceanLevel);
         UnityEngine.Debug.Log(heightMinMax);
         meshFilter.mesh = mesh;
-        ComputeHelper.Release(vertexBuffer);
+        meshRenderer.sharedMaterial = terrainMatInstance;
+        if (hasOcean)
+        {
+            GenerateOcean();
+        }
+        else
+        {
+            DestroyImmediate(oceanObject);
+        }
+            ComputeHelper.Release(vertexBuffer);
         ComputeHelper.Release(heightBuffer);
+        shaderSettings.ReleaseBuffers();
     }
 
     private Vector2 GenerateTerrainMesh()
@@ -172,5 +186,21 @@ public class PlanetGenerator : MonoBehaviour
         maskNoise.elevation = shapePreset.maskNoise.elevation;
         maskNoise.verticalShift = shapePreset.maskNoise.verticalShift;
         maskNoise.offset = shapePreset.maskNoise.offset;
+    }
+
+    private void GenerateOcean()
+    {
+        if (oceanObject == null)
+        {
+            oceanObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        }
+        oceanObject.name = "OceanBody";
+        oceanObject.transform.parent = gameObject.transform;
+        float scale = Mathf.Lerp(heightMinMax.x, heightMinMax.y, oceanLevel);
+        oceanObject.transform.localScale = new Vector3(meshScale * scale + 0.87f, meshScale * scale + 0.87f, meshScale * scale + 0.87f);
+        MeshRenderer mr = oceanObject.GetComponent<MeshRenderer>();
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        mr.receiveShadows = false;
+        mr.sharedMaterial = oceanMaterial;
     }
 }
