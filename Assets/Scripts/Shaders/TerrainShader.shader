@@ -121,7 +121,7 @@
             {
                 v2f o;
 				o.vertexOS = v.vertex.xyz;
-				o.vertexWS = TransformObjectToWorld(v.vertex);
+				o.vertexWS = mul(UNITY_MATRIX_M, v.vertex);
                 o.vertexCS = TransformObjectToHClip(v.vertex);
 				o.normal = v.normal;
                 return o;
@@ -149,7 +149,7 @@
 				float4 texNoise2 = triplanar(i.vertexOS, i.normal, _NoiseScale2, _NoiseTex, sampler_NoiseTex);
 
 				// Flat terrain colour
-				float flatColBlendWeight = Blend(0, _FlatColBlend, (flatHeight01 - .5) + (texNoise.b - 0.5) * _FlatColBlendNoise);
+				float flatColBlendWeight = Blend(0, _FlatColBlend, (flatHeight01 - 0.5) + (texNoise.b - 0.5) * _FlatColBlendNoise);
 				float3 flatTerrainCol = lerp(_FlatLowA, _FlatHighA, flatColBlendWeight);
 				flatTerrainCol = lerp(flatTerrainCol, (_FlatLowA + _FlatHighA) / 2, texNoise.a);
 
@@ -162,7 +162,7 @@
 				// Steep terrain colour
 				float3 sphereTangent = normalize(float3(-sphereNormal.z, 0, sphereNormal.x));
 				float3 normalTangent = normalize(i.normal - sphereNormal * dot(i.normal, sphereNormal));
-				float banding = dot(sphereTangent, normalTangent) * .5 + .5;
+				float banding = dot(sphereTangent, normalTangent) * 0.5 + 0.5;
 				banding = (int)(banding * (_SteepBands + 1)) / _SteepBands;
 				banding = (abs(banding - 0.5) * 2 - 0.5) * _SteepBandStrength;
 				float3 steepTerrainCol = lerp(_SteepLow, _SteepHigh, aboveShoreHeight01 + banding);
@@ -182,7 +182,7 @@
 
 				InputData lighting = (InputData)0;
 				lighting.positionWS = i.vertexWS;
-				lighting.normalWS = i.normal;
+				lighting.normalWS = normalize(mul(UNITY_MATRIX_M, float4(i.normal.xyz, 0)));
 				lighting.viewDirectionWS = GetWorldSpaceViewDir(i.vertexWS);
 				lighting.shadowCoord = TransformWorldToShadowCoord(i.vertexWS);
 

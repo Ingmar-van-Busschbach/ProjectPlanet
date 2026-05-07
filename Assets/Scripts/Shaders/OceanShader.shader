@@ -11,6 +11,7 @@
 		_NoiseScale2("Noise Scale2", Float) = 1
 		_ScrollSpeedX("Scroll Speed X", Float) = 1
 		_ScrollSpeedY("Scroll Speed Y", Float) = 1
+		_ScrollSpeedZ("Scroll Speed Z", Float) = 1
 		_WaveIntensity("Wave Intensity", Float) = 1
 		_WaveHeightOffset("WaveHeightOffset", Float) = 1
 
@@ -45,6 +46,7 @@
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 			#include "../Includes/Math.cginc"
+			#include "../Includes/Noise.cginc"
 
 			float bodyScale;
 
@@ -52,6 +54,7 @@
             {
                 float4 vertex : POSITION;
 				float4 normal : NORMAL;
+				float4 tangent : TANGENT;
             };
 
             struct v2f
@@ -68,33 +71,28 @@
 			SAMPLER(sampler_NoiseTex);
 			float4 _Color;
 			float _NoiseScale, _NoiseScale2;
-			float _ScrollSpeedX, _ScrollSpeedY, _WaveIntensity, _WaveHeightOffset;
-
-			float4 triplanarOffset(float3 vertPos, float3 normal, float3 scale, Texture2D tex, SamplerState samplerTex, float2 offset)
-			{
-			    float3 scaledPos = vertPos / scale;
-			
-			    float4 colX = SAMPLE_TEXTURE2D_LOD(tex, samplerTex, scaledPos.zy + offset, 0);
-			    float4 colY = SAMPLE_TEXTURE2D_LOD(tex, samplerTex, scaledPos.xz + offset, 0);
-			    float4 colZ = SAMPLE_TEXTURE2D_LOD(tex, samplerTex, scaledPos.xy + offset, 0);
-			
-			    float3 blendWeight = normal * normal;
-			    blendWeight /= dot(blendWeight, 1);
-			
-			    return colX * blendWeight.x + colY * blendWeight.y + colZ * blendWeight.z;
-			}
+			float _ScrollSpeedX, _ScrollSpeedY, _ScrollSpeedZ, _WaveIntensity, _WaveHeightOffset;
 
             v2f vertex (appdata v)
             {
                 v2f o;
 				o.vertexOS = v.vertex.xyz;
-				o.vertexWS = TransformObjectToWorld(v.vertex);
-				o.normal = v.normal;
-				// Sample noise texture at two different scales
-				float2 offset = float2(_Time.y * _ScrollSpeedX, _Time.y * _ScrollSpeedY);
-				float4 texNoise = triplanarOffset(o.vertexOS, o.normal, _NoiseScale, _NoiseTex, sampler_NoiseTex, offset);
-				o.vertexCS = TransformObjectToHClip(v.vertex + (v.vertex * texNoise.x * _WaveIntensity) - (v.vertex * _WaveHeightOffset));
-
+				float3 bitangent = cross(v.normal, v.tangent.xyz);
+				float3 v0 = v.vertex.xyz;
+				float3 v1 = o.vertexOS + (v.tangent.xyz * 0.01);
+				float3 v2 = o.vertexOS + (bitangent * 0.01);
+				o.vertexWS = mul(UNITY_MATRIX_M, v.vertex);
+				float3 offset = float3(_Time.y * _ScrollSpeedX, _Time.y * _ScrollSpeedY, _Time.y * _ScrollSpeedZ);
+				float frequency = 5;
+				float ns0 = _NoiseScale * snoise(float3(v0.x + offset.x, v0.y + offset.y, v0.z * offset.z) * frequency);
+				v0.xyz += (((ns0+1)/2) * _WaveIntensity - _WaveHeightOffset) * v.normal;
+				float ns1 = _NoiseScale * snoise(float3(v1.x + offset.x, v1.y + offset.y, v1.z * offset.z) * frequency);
+				v1.xyz += (((ns1+1)/2) * _WaveIntensity - _WaveHeightOffset) * v.normal;
+				float ns2 = _NoiseScale * snoise(float3(v2.x + offset.x, v2.y + offset.y, v2.z * offset.z) * frequency);
+				v2.xyz += (((ns2+1)/2) * _WaveIntensity - _WaveHeightOffset) * v.normal;
+				float3 vn = cross(v2-v0, v1-v0);
+				o.normal = float4(normalize(-vn), 1);
+				o.vertexCS = mul(UNITY_MATRIX_MVP, float4(v0, 1));
                 return o;
             }
 
@@ -102,7 +100,7 @@
             {
 				InputData lighting = (InputData)0;
 				lighting.positionWS = i.vertexWS;
-				lighting.normalWS = i.normal;
+				lighting.normalWS = normalize(mul(UNITY_MATRIX_M, float4(i.normal.xyz, 0)));
 				lighting.viewDirectionWS = GetWorldSpaceViewDir(i.vertexWS);
 				lighting.shadowCoord = TransformWorldToShadowCoord(i.vertexWS);
 
