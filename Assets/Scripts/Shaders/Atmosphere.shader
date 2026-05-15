@@ -2,6 +2,9 @@ Shader "PostProcessing/Atmosphere"
 {
     Properties
     {
+        planetCentre ("Planet Centre", Vector) = (0.000000,0.000000,0.000000,0.000000)
+        atmosphereRadius ("Atmosphere Radius", Float) = 0.000000
+
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
@@ -97,12 +100,37 @@ Shader "PostProcessing/Atmosphere"
             }
             // Object and Global properties
             float _FlipY;
-            
+            float3 planetCentre;
+            float atmosphereRadius;
+
+
             TEXTURE2D_X(_BlitTexture);
             float4 Unity_Universal_SampleBuffer_BlitSource_float(float2 uv)
             {
                 uint2 pixelCoords = uint2(uv * _ScreenSize.xy);
                 return LOAD_TEXTURE2D_X_LOD(_BlitTexture, pixelCoords, 0);
+            }
+
+            float2 RaySphere(float3 sphereCentre, float sphereRadius, float3 rayOrigin, float3 rayDir)
+            {
+                float3 offset = rayOrigin - sphereCentre;
+                float a = 1;
+                float b = 2 * dot(offset, rayDir);
+                float c = dot(offset, offset) - sphereRadius * sphereRadius;
+                float d = b * b - 4 * a * c;
+
+                if (d > 0)
+                {
+                    float s = sqrt(d);
+                    float dstToSphereNear = max(0, (-b - s) / (2 * a));
+                    float dstToSphereFar = (-b + s) / (2 * a);
+                    
+                    if(dstToSphereFar >= 0)
+                    {
+                        return float2(dstToSphereNear, dstToSphereFar - dstToSphereNear);
+                    }
+                }
+                return float2(3402823466000000000.0, 0.0);
             }
             
             // Graph Pixel
@@ -118,8 +146,15 @@ Shader "PostProcessing/Atmosphere"
                 const float2       inputUvs   = IN.NDCPosition.xy;
                 const float4       inputColor = Unity_Universal_SampleBuffer_BlitSource_float(inputUvs);
              
+
+                float3 rayOrigin = GetCameraPositionWS();
+                float3 viewVec   = IN.WorldSpacePosition - rayOrigin;
+                float3 rayDir    = normalize(viewVec);
+
+                float2 hitInfo = RaySphere(planetCentre, atmosphereRadius, rayOrigin, rayDir);
+
                 // Insert your own code, modifying inputColor
-                float4 outputColor = 1 - float4(inputColor.rgb, 1);
+                float4 outputColor = float4(inputColor.rgb, 1);
              
                 surface.BaseColor = outputColor.xyz;
                 surface.Alpha     = 1;

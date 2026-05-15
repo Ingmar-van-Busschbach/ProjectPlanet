@@ -2,18 +2,18 @@ Shader "PostProcessing/Atmosphere2"
 {
     Properties
     {
-        _dirToSun ("dirToSun", Vector) = (0.000000,0.000000,0.000000,0.000000)
-        _planetCentre ("planetCentre", Vector) = (0.000000,0.000000,0.000000,0.000000)
-        _atmosphereRadius ("atmosphereRadius", Float) = 0.000000
-        _oceanRadius ("oceanRadius", Float) = 0.000000
-        _planetRadius ("planetRadius", Float) = 0.000000
-        _numInScatteringPoints ("numInScatteringPoints", Float) = 0.000000
-        _numOpticalDepthPoints ("numOpticalDepthPoints", Float) = 0.000000
-        _intensity ("intensity", Float) = 0.000000
-        _scatteringCoefficients ("scatteringCoefficients", Vector) = (0.000000,0.000000,0.000000,0.000000)
-        _ditherStrength ("ditherStrength", Float) = 0.000000
-        _ditherScale ("Dither Scale", Float) = 0.000000
-        _densityFalloff ("densityFalloff", Float) = 0.000000
+        dirToSun ("dirToSun", Vector) = (0.000000,0.000000,0.000000,0.000000)
+        planetCentre ("planetCentre", Vector) = (0.000000,0.000000,0.000000,0.000000)
+        atmosphereRadius ("atmosphereRadius", Float) = 0.000000
+        oceanRadius ("oceanRadius", Float) = 0.000000
+        planetRadius ("planetRadius", Float) = 0.000000
+        numInScatteringPoints ("numInScatteringPoints", Float) = 0.000000
+        numOpticalDepthPoints ("numOpticalDepthPoints", Float) = 0.000000
+        intensity ("intensity", Float) = 0.000000
+        scatteringCoefficients ("scatteringCoefficients", Vector) = (0.000000,0.000000,0.000000,0.000000)
+        ditherStrength ("ditherStrength", Float) = 0.000000
+        ditherScale ("Dither Scale", Float) = 0.000000
+        densityFalloff ("densityFalloff", Float) = 0.000000
         [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}

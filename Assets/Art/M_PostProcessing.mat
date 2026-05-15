@@ -123,6 +123,15 @@ Material:
     - _numOpticalDepthPoints: 100
     - _oceanRadius: 100
     - _planetRadius: 100
+    - atmosphereRadius: 1.25
+    - densityFalloff: 4.3
+    - ditherScale: 3.89
+    - ditherStrength: 1
+    - intensity: 1
+    - numInScatteringPoints: 10
+    - numOpticalDepthPoints: 100
+    - oceanRadius: 1
+    - planetRadius: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
@@ -131,6 +140,9 @@ Material:
     - _dirToSun: {r: 1, g: 1, b: 1, a: 0}
     - _planetCentre: {r: 0, g: 0, b: 0, a: 0}
     - _scatteringCoefficients: {r: 700, g: 530, b: 460, a: 0}
+    - dirToSun: {r: 0.569, g: 1.355, b: -0.985, a: 0}
+    - planetCentre: {r: 0, g: 0, b: 0, a: 0}
+    - scatteringCoefficients: {r: 700, g: 15.3, b: 4.6, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &1251109505137046856
