@@ -26,7 +26,6 @@ Shader "PostProcessing/Atmosphere"
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
-            // #pragma enable_d3d11_debug_symbols
             
             // Keywords
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
@@ -120,7 +119,7 @@ Shader "PostProcessing/Atmosphere"
                 const float4       inputColor = Unity_Universal_SampleBuffer_BlitSource_float(inputUvs);
              
                 // Insert your own code, modifying inputColor
-                float4 outputColor = float4(inputColor.rgb, 1);
+                float4 outputColor = 1 - float4(inputColor.rgb, 1);
              
                 surface.BaseColor = outputColor.xyz;
                 surface.Alpha     = 1;
