@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public static class ComputeHelper
 {
@@ -46,5 +47,29 @@ public static class ComputeHelper
                 buffers[i].Release();
             }
         }
+    }
+
+    public static void CreateRenderTexture(ref RenderTexture texture, int size, FilterMode filterMode = FilterMode.Bilinear, GraphicsFormat format = GraphicsFormat.R16G16B16A16_SFloat)
+    {
+        CreateRenderTexture(ref texture, size, size, filterMode, format);
+    }
+
+    public static void CreateRenderTexture(ref RenderTexture texture, int width, int height, FilterMode filterMode = FilterMode.Bilinear, GraphicsFormat format = GraphicsFormat.R16G16B16A16_SFloat)
+    {
+        if (texture == null || !texture.IsCreated() || texture.width != width || texture.height != height || texture.graphicsFormat != format)
+        {
+            if (texture != null)
+            {
+                texture.Release();
+            }
+            texture = new RenderTexture(width, height, 0);
+            texture.graphicsFormat = format;
+            texture.enableRandomWrite = true;
+
+            texture.autoGenerateMips = false;
+            texture.Create();
+        }
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.filterMode = filterMode;
     }
 }

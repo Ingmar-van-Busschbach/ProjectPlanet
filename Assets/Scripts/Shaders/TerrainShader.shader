@@ -122,7 +122,7 @@
                 v2f o;
 				o.vertexOS = v.vertex.xyz;
 				o.vertexWS = mul(UNITY_MATRIX_M, v.vertex);
-                o.vertexCS = TransformObjectToHClip(v.vertex);
+                o.vertexCS = mul(UNITY_MATRIX_MVP, v.vertex);
 				o.normal = v.normal;
                 return o;
             }

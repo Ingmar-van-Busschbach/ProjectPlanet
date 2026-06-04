@@ -135,6 +135,11 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
+    - _VoronoiDensity: 5
+    - _VoronoiDensity2: 10
+    - _VoronoiPower: 3
+    - _VoronoiScale: 100
+    - _VoronoiSpeed: 2
     - _WaveHeightOffset: 0.037
     - _WaveIntensity: 0.02
     - _WorkflowMode: 1
@@ -144,5 +149,6 @@ Material:
     - _Color: {r: 0.075849034, g: 0.5072654, b: 0.5999999, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _WaveColor: {r: 0.6129939, g: 0.8067019, b: 0.96981126, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

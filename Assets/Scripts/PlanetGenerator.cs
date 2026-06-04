@@ -40,6 +40,9 @@ public class PlanetGenerator : MonoBehaviour
     [SerializeField] private float mountainBlend = 1.2f;
     [SerializeField] private Material oceanMaterial;
 
+    [SerializeField] private AtmosphereSettings atmosphereSettings;
+    [SerializeField] private Material atmosphereMaterial;
+
     //Components
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
@@ -67,7 +70,6 @@ public class PlanetGenerator : MonoBehaviour
         heightMinMax = GenerateTerrainMesh();
         terrainMatInstance = new Material(shaderSettings.terrainMaterial);
         shaderSettings.SetTerrainProperties(terrainMatInstance, heightMinMax, meshScale, oceanLevel);
-        UnityEngine.Debug.Log(heightMinMax);
         meshFilter.mesh = mesh;
         meshRenderer.sharedMaterial = terrainMatInstance;
         if (hasOcean)
@@ -81,6 +83,7 @@ public class PlanetGenerator : MonoBehaviour
             ComputeHelper.Release(vertexBuffer);
         ComputeHelper.Release(heightBuffer);
         shaderSettings.ReleaseBuffers();
+        atmosphereSettings.SetProperties(atmosphereMaterial, meshScale);
     }
 
     private Vector2 GenerateTerrainMesh()
