@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public static class MeshCreator
 {
