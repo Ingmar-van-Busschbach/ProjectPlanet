@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public class PlanetGenerator : MonoBehaviour
     public ShapeData shapePreset;
     [SerializeField] private ComputeShader heightMapComputeShader;
     [Tooltip("The vertex count per axis of a face. There are 6 faces and 2 axis per face. As such, the total vertex count after triangulation is [12*resolution^2]")]
-    [Range(1,100)]
+    [Range(0,100)]
     [SerializeField] private int meshResolution = 10;
     [Range(1, 1000)]
     public int seed = 100;

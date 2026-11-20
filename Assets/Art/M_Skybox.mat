@@ -143,7 +143,7 @@ Material:
     - _SrcBlendAlpha: 1
     - _StarIntensity: 5
     - _StarPower: 35
-    - _StarScale: 200
+    - _StarScale: 1000
     - _SunDisk: 2
     - _SunSize: 0.04
     - _SunSizeConvergence: 5
